@@ -8,10 +8,14 @@
       <TableCell
         v-for="(cell, cellIndex) in row"
         :key="rowIndex + '-' + cellIndex + '-' + cell"
-        :data="{figureType: cell, cx: cellIndex, cy: rowIndex}"
-        :class="{'checkers-table__cell--highlight': tableHighlight[rowIndex][cellIndex] === 1}"
+        :data="{ figureType: cell, cx: cellIndex, cy: rowIndex }"
+        :class="{
+          'checkers-table__cell--highlight':
+            tableHighlight[rowIndex][cellIndex] === 1,
+        }"
         class="checkers-table__cell"
-        @showWay="showWay"
+        @showWay="useShowWay"
+        @moveChecker="useMoveChecker"
       />
     </div>
   </div>
@@ -22,37 +26,11 @@
   import { storeToRefs } from "pinia";
   import { useMainStore } from "@/store";
 
+  import { useShowWay } from "@/composables/useShowWay.js";
+  import { useMoveChecker } from "@/composables/useMoveChecker.js";
+
   const store = useMainStore();
   const { table, tableHighlight } = storeToRefs(store);
-
-  const cx = ref(props.data.cx);
-  const cy = ref(props.data.cy);
-
-  function showWay(data) {
-    const { ways } = data;
-
-    //создаем временный пустой массив
-    const tempArr = [
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-    ];
-
-    //добавляем подсветку для возможных путей передвижения
-    ways.forEach((way) => {
-      tempArr[way.cy][way.cx] = 1;
-    });
-
-    //обновляем store
-    store.$patch({
-      tableHighlight: tempArr,
-    });
-  }
 </script>
 
 <style lang="less">
@@ -62,23 +40,6 @@
     width: 800px;
     height: 800px;
     border: 1px solid @gray;
-
-    &__cell {
-      position: relative;
-
-      &--highlight {
-        &::before {
-          content: "";
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background-color: @green;
-          opacity: 0.5;
-        }
-      }
-    }
 
     &__row {
       display: flex;
@@ -93,6 +54,22 @@
       &:nth-child(2n + 1) {
         .checkers-table__cell:nth-child(2n) {
           background-color: @brown;
+        }
+      }
+    }
+    &__cell {
+      position: relative;
+
+      &--highlight {
+        &::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: @green;
+          opacity: 0.5;
         }
       }
     }
